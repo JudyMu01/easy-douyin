@@ -1,11 +1,19 @@
 package service
 
 import (
+	"bytes"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/JudyMu01/easy-douyin/util"
+	"github.com/disintegration/imaging"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
+
+var serverAddr string = "http://192.168.2.119:8080/"
 
 type VideoData struct {
 	Id            int64    `json:"id,omitempty"`
@@ -41,11 +49,22 @@ func PrepareVideoData(latestTime int64, token string) ([]VideoData, int64, error
 	return videoData, next_time, nil
 }
 
-func PostVideo(videoData VideoData) (*repository.Video, error) {
-	// var oldVideo Video
-	// db.Last(&oldVideo) //video that has the max id
-	// newVideo := Video{Id: video.Id + 1, PlayUrl: newVideoData.PlayUrl, CoverUrl: newVideoData.CoverUrl, Title: newVideoData.Title, UserId: newVideoData.Author.Id, CreateTime: time.Now(), CommentCount: 0, FavoriteCount: 0}
-	return nil, nil
+func PostVideo(fileName string, title string, userID int64) (*repository.Video, error) {
+	playUrl := serverAddr + "public/videos/" + fileName
+	//添加生成视频关键帧并上传到public目录的函数
+	_, err := GetSnapshot("./public/videos/"+fileName, "./public/covers/"+fileName, 1)
+	if err != nil {
+		util.Logger.Error("generate cover err:" + err.Error())
+		return nil, err
+	}
+	coverUrl := serverAddr + "public/covers/" + fileName + ".png"
+	newVideo := repository.Video{PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, UserId: userID, CreateTime: time.Now(), CommentCount: 0, FavoriteCount: 0}
+	video, err := repository.NewVideoDaoInstance().AddVideo(newVideo)
+	if err != nil {
+		util.Logger.Error("post video to db err:" + err.Error())
+		return nil, err
+	}
+	return video, nil
 }
 
 func GetPublishList(userID int64, token string) ([]VideoData, error) {
@@ -65,4 +84,32 @@ func GetPublishList(userID int64, token string) ([]VideoData, error) {
 	}
 
 	return videoDataList, nil
+}
+
+func GetSnapshot(videoPath, snapshotPath string, frameNum int) (snapshotName string, err error) {
+	buf := bytes.NewBuffer(nil)
+	err = ffmpeg.Input(videoPath).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frameNum)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(buf, os.Stdout).
+		Run()
+	if err != nil {
+		util.Logger.Error("generate cover fail:" + err.Error())
+		return "", err
+	}
+
+	img, err := imaging.Decode(buf)
+	if err != nil {
+		util.Logger.Error("decoding cover fail:" + err.Error())
+		return "", err
+	}
+
+	err = imaging.Save(img, snapshotPath+".png")
+	if err != nil {
+		util.Logger.Error("saving cover fail:" + err.Error())
+		return "", err
+	}
+	names := strings.Split(snapshotPath, "\\")
+	snapshotName = names[len(names)-1] + ".png"
+	return snapshotName, nil
 }

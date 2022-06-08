@@ -38,20 +38,7 @@ func NewVideoDaoInstance() *VideoDao {
 	return videoDao
 }
 
-// func (*UserDao) MQueryUserById(ids []int64) (map[int64]*User, error) {
-// 	var users []*User
-// 	err := db.Where("id in (?)", ids).Find(&users).Error
-// 	if err != nil {
-// 		util.Logger.Error("batch find user by id err:" + err.Error())
-// 		return nil, err
-// 	}
-// 	userMap := make(map[int64]*User)
-// 	for _, user := range users {
-// 		userMap[user.Id] = user
-// 	}
-// 	return userMap, nil
-// }
-
+// feed videos before latest time, order by create_time
 func (*VideoDao) VideoPrepare(latest int64) ([]*Video, error) {
 
 	var videoList []*Video
@@ -70,8 +57,12 @@ func (*VideoDao) VideoPrepare(latest int64) ([]*Video, error) {
 
 	return videoList, nil
 }
-func (*VideoDao) AddVideo(newVideo Video) (*Video, error) {
 
+// create a new video in db
+func (*VideoDao) AddVideo(newVideo Video) (*Video, error) {
+	var oldVideo Video
+	db.Last(&oldVideo) //video that has the max id
+	newVideo.Id = oldVideo.Id + 1
 	err := db.Create(&newVideo).Error
 	if err != nil {
 		util.Logger.Error("add video err:" + err.Error())
@@ -81,6 +72,7 @@ func (*VideoDao) AddVideo(newVideo Video) (*Video, error) {
 	return &newVideo, nil
 }
 
+// get a publish list of the login user
 func (*VideoDao) SearchVideoById(userID int64) ([]*Video, error) {
 	var videoList []*Video
 	err := db.Model(&Video{}).Where("user_id = ?", userID).Find(&videoList).Error

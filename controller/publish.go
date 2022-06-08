@@ -15,10 +15,10 @@ type VideoListResponse struct {
 	VideoList []service.VideoData `json:"video_list"`
 }
 
-// Publish check token then save upload file to public directory
+// Publish check token then save upload file to public directory, and save data in db
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
-
+	title := c.PostForm("title")
 	if _, exist := service.UsersLoginInfo[token]; !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
@@ -36,11 +36,21 @@ func Publish(c *gin.Context) {
 	filename := filepath.Base(data.Filename)
 	user := service.UsersLoginInfo[token]
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
-	saveFile := filepath.Join("./public/", finalName)
+	saveFile := filepath.Join("./public/videos/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
+		})
+		return
+	}
+
+	//传一个视频名字，一个title，一个userID
+	newVid, err := service.PostVideo(finalName, title, user.Id)
+	if newVid == nil || err != nil {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 2,
+			StatusMsg:  "save post video to db fail",
 		})
 		return
 	}
