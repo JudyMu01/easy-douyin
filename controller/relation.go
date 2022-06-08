@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/RaymondCode/simple-demo/service"
+	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/gin-gonic/gin"
 )
 

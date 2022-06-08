@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/RaymondCode/simple-demo/repository"
+	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/gin-gonic/gin"
 )
 

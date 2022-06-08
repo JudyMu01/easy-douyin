@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/RaymondCode/simple-demo/util"
+	"github.com/JudyMu01/easy-douyin/util"
 	"gorm.io/gorm"
 )
 

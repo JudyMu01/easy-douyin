@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/RaymondCode/simple-demo/controller"
+	"net/http"
+
+	"github.com/JudyMu01/easy-douyin/controller"
 	"github.com/gin-gonic/gin"
 )
 
 func initRouter(r *gin.Engine) {
 
 	// public directory is used to serve static resources
-	r.Static("/static", "./public")
-
+	r.StaticFS("/public", http.Dir("./public"))
 	apiRouter := r.Group("/douyin")
 
 	// basic apis

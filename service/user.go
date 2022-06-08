@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/RaymondCode/simple-demo/repository"
-	"github.com/RaymondCode/simple-demo/util"
+	"github.com/JudyMu01/easy-douyin/repository"
+	"github.com/JudyMu01/easy-douyin/util"
 )
 
 var UsersLoginInfo = map[string]UserData{

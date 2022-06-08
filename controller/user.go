@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/RaymondCode/simple-demo/repository"
-	"github.com/RaymondCode/simple-demo/service"
+	"github.com/JudyMu01/easy-douyin/repository"
+	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,20 +41,19 @@ func Register(c *gin.Context) {
 			Response: Response{StatusCode: 2, StatusMsg: "when register,checking existence in db has error"},
 		})
 	} else {
-		//user doesn't exist
+		//ok to register
 		user, err := service.UserReigster(username, password)
 		if err != nil {
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 3, StatusMsg: "add new user error"},
 			})
 		} else {
-
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: Response{StatusCode: 0},
+				UserId:   user.Id,
+				Token:    token,
+			})
 		}
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   user.Id,
-			Token:    token,
-		})
 	}
 }
 
