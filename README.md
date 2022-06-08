@@ -17,11 +17,11 @@ go build && ./simple-demo
 * 登录/douyin/user/login/
 * 注册/douyin/user/register/
 * 用户信息/douyin/user/
+* 视频流接口/feed/
+* 发布列表/publish/list/
 
 未实现接口 douyin/
-* 视频流接口/feed/
 * 投稿接口/publish/action/
-* 发布列表/publish/list/
 * 赞操作/favorite/action/
 * 点赞列表/favorite/list/
 * 评论操作/comment/action/

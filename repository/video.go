@@ -80,3 +80,16 @@ func (*VideoDao) AddVideo(newVideo Video) (*Video, error) {
 
 	return &newVideo, nil
 }
+
+func (*VideoDao) SearchVideoById(userID int64) ([]*Video, error) {
+	var videoList []*Video
+	err := db.Model(&Video{}).Where("user_id = ?", userID).Find(&videoList).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		util.Logger.Error("search user videos err:" + err.Error())
+		return nil, err
+	}
+	return videoList, nil
+}

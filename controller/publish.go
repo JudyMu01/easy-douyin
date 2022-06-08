@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 type VideoListResponse struct {
 	Response
-	VideoList []Video `json:"video_list"`
+	VideoList []service.VideoData `json:"video_list"`
 }
 
 // Publish check token then save upload file to public directory
@@ -50,12 +51,27 @@ func Publish(c *gin.Context) {
 	})
 }
 
-// PublishList all users have same publish video list
+// PublishList , get list of videos posted by current login user
 func PublishList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
-		Response: Response{
-			StatusCode: 0,
-		},
-		VideoList: DemoVideos,
-	})
+	token := c.Query("token")
+	userID, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
+
+	videoList, err := service.GetPublishList(userID, token)
+	if err != nil {
+		fmt.Printf("get publish list failed: %s", err)
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "get publish list failed",
+			},
+		})
+	} else {
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 0,
+			},
+			VideoList: videoList,
+		})
+	}
+
 }

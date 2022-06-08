@@ -1,6 +1,8 @@
 package controller
 
-var DemoVideos = []Video{
+import "github.com/JudyMu01/easy-douyin/service"
+
+var DemoVideos = []service.VideoData{
 	{
 		Id:            1,
 		Author:        DemoUser,
@@ -21,7 +23,7 @@ var DemoComments = []Comment{
 	},
 }
 
-var DemoUser = User{
+var DemoUser = service.UserData{
 	Id:            1,
 	Name:          "TestUser",
 	FollowCount:   0,

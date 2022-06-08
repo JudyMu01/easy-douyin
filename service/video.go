@@ -47,3 +47,22 @@ func PostVideo(videoData VideoData) (*repository.Video, error) {
 	// newVideo := Video{Id: video.Id + 1, PlayUrl: newVideoData.PlayUrl, CoverUrl: newVideoData.CoverUrl, Title: newVideoData.Title, UserId: newVideoData.Author.Id, CreateTime: time.Now(), CommentCount: 0, FavoriteCount: 0}
 	return nil, nil
 }
+
+func GetPublishList(userID int64, token string) ([]VideoData, error) {
+
+	videoList, err := repository.NewVideoDaoInstance().SearchVideoById(userID)
+	if err != nil {
+		util.Logger.Error("search video by id err:" + err.Error())
+		return nil, err
+	}
+	//prepare VideoData list
+	var videoDataList []VideoData
+	for _, k := range videoList {
+		author, _ := QueryUserData(userID, token)
+		//isFavorite := QueryLike(k.Id,k.UserId)
+		videoData := VideoData{Id: k.Id, Author: *author, PlayUrl: k.PlayUrl, CoverUrl: k.CoverUrl, FavoriteCount: k.FavoriteCount, CommentCount: k.CommentCount, IsFavorite: false, Title: k.Title}
+		videoDataList = append(videoDataList, videoData)
+	}
+
+	return videoDataList, nil
+}
