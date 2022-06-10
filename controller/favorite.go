@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/JudyMu01/easy-douyin/service"
+	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,7 +11,7 @@ import (
 func FavoriteAction(c *gin.Context) {
 	token := c.Query("token")
 
-	if _, exist := service.UsersLoginInfo[token]; exist {
+	if _, exist := repository.UsersLoginInfo[token]; exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 0})
 	} else {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})

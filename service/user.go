@@ -5,16 +5,6 @@ import (
 	"github.com/JudyMu01/easy-douyin/util"
 )
 
-var UsersLoginInfo = map[string]UserData{
-	"zhangleidouyin": {
-		Id:            1,
-		Name:          "zhanglei",
-		FollowCount:   10,
-		FollowerCount: 5,
-		IsFollow:      true,
-	},
-}
-
 type UserData struct {
 	Id            int64  `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`
@@ -29,7 +19,21 @@ func QueryUserData(userid int64, token string) (*UserData, error) {
 		util.Logger.Error("find user by id err:" + err.Error())
 		return nil, err
 	}
-	var userData = UserData{Id: user.Id, Name: user.Name, FollowCount: user.Follow_count, FollowerCount: user.Follower_count, IsFollow: true}
+	var isFollow bool
+	res, err := repository.QueryFollowInfo(repository.UsersLoginInfo[token].Id, userid)
+	if err != nil {
+		util.Logger.Error("query follow info err:" + err.Error())
+		return nil, err
+	} else {
+		if res == 1 {
+			isFollow = true
+		} else {
+			isFollow = false
+		}
+	}
+	followCount, _ := repository.CountFollow(userid)
+	followerCount, _ := repository.CountFollower(userid)
+	var userData = UserData{Id: user.Id, Name: user.Name, FollowCount: followCount, FollowerCount: followerCount, IsFollow: isFollow}
 
 	return &userData, nil
 }
@@ -40,6 +44,6 @@ func UserReigster(username string, password string) (*UserData, error) {
 		util.Logger.Error("add user to db err:" + err.Error())
 		return nil, err
 	}
-	var userData = UserData{Id: user.Id, Name: user.Name, FollowCount: user.Follow_count, FollowerCount: user.Follower_count, IsFollow: false}
+	var userData = UserData{Id: user.Id, Name: user.Name, FollowCount: 0, FollowerCount: 0, IsFollow: false}
 	return &userData, nil
 }

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,7 @@ type VideoListResponse struct {
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 	title := c.PostForm("title")
-	if _, exist := service.UsersLoginInfo[token]; !exist {
+	if _, exist := repository.UsersLoginInfo[token]; !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
@@ -34,7 +35,7 @@ func Publish(c *gin.Context) {
 	}
 
 	filename := filepath.Base(data.Filename)
-	user := service.UsersLoginInfo[token]
+	user := repository.UsersLoginInfo[token]
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/videos/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {

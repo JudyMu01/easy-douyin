@@ -8,14 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
+var UsersLoginInfo map[string]User
+
 type User struct {
-	Id             int64     `gorm:"column:user_id"`
-	Name           string    `gorm:"column:username"`
-	Password       string    `gorm:"column:password"`
-	Follow_count   int64     `gorm:"column:follow_count"`
-	Follower_count int64     `gorm:"column:follower_count"`
-	CreateTime     time.Time `gorm:"column:create_time"`
-	ModifyTime     time.Time `gorm:"column:modify_time"`
+	Id         int64     `gorm:"column:user_id"`
+	Name       string    `gorm:"column:username"`
+	Password   string    `gorm:"column:password"`
+	CreateTime time.Time `gorm:"column:create_time"`
+	ModifyTime time.Time `gorm:"column:modify_time"`
 }
 
 func (User) TableName() string {
@@ -49,19 +49,15 @@ func (*UserDao) QueryUserById(id int64) (*User, error) {
 	return &user, nil
 }
 
-// func (*UserDao) MQueryUserById(ids []int64) (map[int64]*User, error) {
-// 	var users []*User
-// 	err := db.Where("id in (?)", ids).Find(&users).Error
-// 	if err != nil {
-// 		util.Logger.Error("batch find user by id err:" + err.Error())
-// 		return nil, err
-// 	}
-// 	userMap := make(map[int64]*User)
-// 	for _, user := range users {
-// 		userMap[user.Id] = user
-// 	}
-// 	return userMap, nil
-// }
+//when initing db, create the token-User map for checking token in following user operations.
+func (*UserDao) TokenMap() {
+	UsersLoginInfo = make(map[string]User)
+	result := make([]*User, 0)
+	db.Find(&result)
+	for _, i := range result {
+		UsersLoginInfo[i.Name+i.Password] = *i
+	}
+}
 
 func (*UserDao) QueryUserByName(username string) (*User, error) {
 	var user User
@@ -79,7 +75,7 @@ func (*UserDao) QueryUserByName(username string) (*User, error) {
 func (*UserDao) AddUser(username string, password string) (*User, error) {
 	var user User
 	db.Last(&user) //max id
-	newUser := User{Id: user.Id + 1, Name: username, Password: password, Follow_count: 0, Follower_count: 0, CreateTime: time.Now(), ModifyTime: time.Now()}
+	newUser := User{Id: user.Id + 1, Name: username, Password: password, CreateTime: time.Now(), ModifyTime: time.Now()}
 	err := db.Create(&newUser).Error
 	if err != nil {
 		util.Logger.Error("create user err:" + err.Error())
