@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,26 +27,22 @@ type UserResponse struct {
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
-
 	token := username + password
+
 	//query if user exists
-	var usersLoginInfo, err = repository.NewUserDaoInstance().QueryUserByName(username)
-	if usersLoginInfo != nil {
+	if _, exist := repository.UsersLoginInfo[token]; exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
 		})
-	} else if err != nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 2, StatusMsg: "when register,checking existence in db has error"},
-		})
 	} else {
-		//ok to register
 		user, err := service.UserReigster(username, password)
 		if err != nil {
 			c.JSON(http.StatusOK, UserLoginResponse{
-				Response: Response{StatusCode: 3, StatusMsg: "add new user error"},
+				Response: Response{StatusCode: 2, StatusMsg: "add new user error"},
 			})
 		} else {
+			// update token map
+			repository.NewUserDaoInstance().TokenMap()
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 0},
 				UserId:   user.Id,
@@ -60,23 +55,20 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
-
 	token := username + password
-	var usersLoginInfo, err = repository.NewUserDaoInstance().QueryUserByName(username)
 
-	if err != nil {
-		fmt.Println(err)
-	}
-	if usersLoginInfo.Password != password {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 2, StatusMsg: "Password wrong"},
-		})
-	} else if usersLoginInfo != nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   usersLoginInfo.Id,
-			Token:    token,
-		})
+	if user, exist := repository.UsersLoginInfo[token]; exist {
+		if repository.UsersLoginInfo[token].Password != password {
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: Response{StatusCode: 2, StatusMsg: "Password wrong"},
+			})
+		} else {
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: Response{StatusCode: 0},
+				UserId:   user.Id,
+				Token:    token,
+			})
+		}
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},

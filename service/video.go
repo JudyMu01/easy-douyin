@@ -39,13 +39,12 @@ func PrepareVideoData(latestTime int64, token string) ([]VideoData, int64, error
 	}
 	var videoData = make([]VideoData, 10)
 	var next_time int64
-	for i, k := range videos {
-		author, _ := QueryUserData(k.UserId, token)
-		//isFavorite := QueryLike(k.Id,k.UserId)
-		videoData[i] = VideoData{Id: k.Id, Author: *author, PlayUrl: k.PlayUrl, CoverUrl: k.CoverUrl, FavoriteCount: k.FavoriteCount, CommentCount: k.CommentCount, IsFavorite: false, Title: k.Title}
-		next_time = k.CreateTime.Unix()
+	videoData, err = prepare_videoData(videos, token)
+	if err != nil {
+		util.Logger.Error("prepare video data err:" + err.Error())
+		return nil, time.Now().Unix(), err
 	}
-
+	next_time = videos[len(videoData)-1].CreateTime.Unix()
 	return videoData, next_time, nil
 }
 
@@ -58,7 +57,7 @@ func PostVideo(fileName string, title string, userID int64) (*repository.Video, 
 		return nil, err
 	}
 	coverUrl := serverAddr + "public/covers/" + fileName + ".png"
-	newVideo := repository.Video{PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, UserId: userID, CreateTime: time.Now(), CommentCount: 0, FavoriteCount: 0}
+	newVideo := repository.Video{PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, UserId: userID, CreateTime: time.Now()}
 	video, err := repository.NewVideoDaoInstance().AddVideo(newVideo)
 	if err != nil {
 		util.Logger.Error("post video to db err:" + err.Error())
@@ -75,14 +74,11 @@ func GetPublishList(userID int64, token string) ([]VideoData, error) {
 		return nil, err
 	}
 	//prepare VideoData list
-	var videoDataList []VideoData
-	for _, k := range videoList {
-		author, _ := QueryUserData(userID, token)
-		//isFavorite := QueryLike(k.Id,k.UserId)
-		videoData := VideoData{Id: k.Id, Author: *author, PlayUrl: k.PlayUrl, CoverUrl: k.CoverUrl, FavoriteCount: k.FavoriteCount, CommentCount: k.CommentCount, IsFavorite: false, Title: k.Title}
-		videoDataList = append(videoDataList, videoData)
+	videoDataList, err := prepare_videoData(videoList, token)
+	if err != nil {
+		util.Logger.Error("prepare video data err:" + err.Error())
+		return nil, err
 	}
-
 	return videoDataList, nil
 }
 
@@ -112,4 +108,25 @@ func GetSnapshot(videoPath, snapshotPath string, frameNum int) (snapshotName str
 	names := strings.Split(snapshotPath, "\\")
 	snapshotName = names[len(names)-1] + ".png"
 	return snapshotName, nil
+}
+
+// prepare video data
+func prepare_videoData(videoList []*repository.Video, token string) ([]VideoData, error) {
+	var videoDataList []VideoData
+	for _, k := range videoList {
+		author, _ := QueryUserData(k.UserId, token)
+		var isFavorite bool
+		if token == "" {
+			isFavorite = false
+		} else {
+			isFavorite, _ = repository.QueryLike(k.Id, repository.UsersLoginInfo[token].Id)
+		}
+
+		favoriteCount, _ := repository.CountLike(k.Id)
+		commentCount, _ := repository.CountComment(k.Id)
+		videoData := VideoData{Id: k.Id, Author: *author, PlayUrl: k.PlayUrl, CoverUrl: k.CoverUrl, FavoriteCount: favoriteCount, CommentCount: commentCount, IsFavorite: isFavorite, Title: k.Title}
+		videoDataList = append(videoDataList, videoData)
+	}
+	return videoDataList, nil
+
 }

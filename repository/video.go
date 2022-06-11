@@ -10,14 +10,12 @@ import (
 )
 
 type Video struct {
-	Id            int64     `gorm:"column:video_id"`
-	PlayUrl       string    `gorm:"column:play_url"`
-	CoverUrl      string    `gorm:"column:cover_url"`
-	Title         string    `gorm:"column:title"`
-	CreateTime    time.Time `gorm:"column:create_time"`
-	FavoriteCount int64     `gorm:"column:favorite_count"`
-	CommentCount  int64     `gorm:"column:comment_count"`
-	UserId        int64     `gorm:"column:user_id"`
+	Id         int64     `gorm:"column:video_id"`
+	PlayUrl    string    `gorm:"column:play_url"`
+	CoverUrl   string    `gorm:"column:cover_url"`
+	Title      string    `gorm:"column:title"`
+	CreateTime time.Time `gorm:"column:create_time"`
+	UserId     int64     `gorm:"column:user_id"`
 }
 
 func (Video) TableName() string {
@@ -84,4 +82,31 @@ func (*VideoDao) SearchVideoById(userID int64) ([]*Video, error) {
 		return nil, err
 	}
 	return videoList, nil
+}
+
+// get userId of a video
+func (*VideoDao) SearchUserByVid(videoID int64) (*Video, error) {
+	var video Video
+	err := db.Model(&Video{}).Where("video_id = ?", videoID).Find(&video).Error
+	if err != nil {
+		util.Logger.Error("search video's author id err:" + err.Error())
+		return nil, err
+	}
+	return &video, nil
+}
+
+// count like number
+func CountLike(videoId int64) (int64, error) {
+	var count int64
+	err := db.Model(&Like{}).Where("video_id = ?", videoId).Count(&count).Error
+	if err != nil {
+		util.Logger.Error("count like err: " + err.Error())
+		return -1, err
+	}
+	return count, nil
+}
+
+// count comment number
+func CountComment(videoId int64) (int64, error) {
+	return 0, nil
 }

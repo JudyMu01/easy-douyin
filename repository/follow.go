@@ -32,11 +32,11 @@ func NewFollowDaoInstance() *FollowDao {
 }
 
 // add a follow record
-func (*FollowDao) CreateFollow(follow Follow) (*Follow, error) {
+func (*FollowDao) CreateFollow(follow Follow) error {
 
 	err := db.Create(&follow).Error
 
-	return &follow, err
+	return err
 }
 
 // delete a follow record

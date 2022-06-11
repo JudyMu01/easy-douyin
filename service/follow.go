@@ -10,15 +10,12 @@ import (
 func AddFollow(token string, toUserId int64) error {
 
 	var follow = repository.Follow{FromUserId: repository.UsersLoginInfo[token].Id, ToUserId: toUserId, CreateTime: time.Now()}
-	newFollow, err := repository.NewFollowDaoInstance().CreateFollow(follow)
-	if newFollow == nil {
-		util.Logger.Error("add follow fail")
-		return nil
-	}
+	err := repository.NewFollowDaoInstance().CreateFollow(follow)
 	if err != nil {
 		util.Logger.Error("add follow record err:" + err.Error())
 		return err
 	}
+
 	return nil
 }
 func CancelFollow(token string, toUserId int64) error {

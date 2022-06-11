@@ -23,11 +23,8 @@ func RelationAction(c *gin.Context) {
 	if _, exist := repository.UsersLoginInfo[token]; exist {
 		var err error
 		if actionType == "1" {
-			//follow
 			err = service.AddFollow(token, toUserId)
-
 		} else {
-			//unfollow
 			err = service.CancelFollow(token, toUserId)
 		}
 		if err == nil {
