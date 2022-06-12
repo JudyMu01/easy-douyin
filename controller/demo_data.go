@@ -14,7 +14,7 @@ var DemoVideos = []service.VideoData{
 	},
 }
 
-var DemoComments = []Comment{
+var DemoComments = []service.CommentData{
 	{
 		Id:         1,
 		User:       DemoUser,

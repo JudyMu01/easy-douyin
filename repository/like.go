@@ -73,3 +73,9 @@ func GetFavoriteList(userId int64) ([]int64, error) {
 	}
 	return videoIds, nil
 }
+
+func CountTotalLikeByUser(userId int64) (int64, error) {
+	var count int64
+	err := db.Model(&Like{}).Where("user_id = ?", userId).Count(&count).Error
+	return count, err
+}

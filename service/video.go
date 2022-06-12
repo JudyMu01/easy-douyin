@@ -44,8 +44,9 @@ func PrepareVideoData(latestTime int64, token string) ([]VideoData, int64, error
 		util.Logger.Error("prepare video data err:" + err.Error())
 		return nil, time.Now().Unix(), err
 	}
-	next_time = videos[len(videoData)-1].CreateTime.Unix()
+
 	return videoData, next_time, nil
+
 }
 
 func PostVideo(fileName string, title string, userID int64) (*repository.Video, error) {

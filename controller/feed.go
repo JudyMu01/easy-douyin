@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//request类型
+//response类型
 type FeedResponse struct {
 	Response
 	VideoList []service.VideoData `json:"video_list,omitempty"`

@@ -1,40 +1,72 @@
 # easy-douyin
+* [📦 Install ](#install) -- Install relevant dependencies and the project
+* [🔧 Usage ](#usage) -- Commands to run the server
+* [📦 Directory structure ](#directory) -- What does each file do
+## Install
 
-## 抖音项目服务端简单示例
 
-具体功能内容参考飞书说明文档
+### Install ffmpeg
+```markdown
+Browse and install ffmpeg according to your OS for generation of video covers.
+https://ffbinaries.com/downloads
+```
 
-工程无其他依赖，直接编译运行即可
+### Install dousheng apk
+```markdown
+Install dousheng android apk to test the program on your mobile phone.
+https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7#
+```
+
+## Usage
 
 ```shell
 go build && ./easy-douyin
 ```
 
-### 功能说明
-
-已实现接口
-
-* 登录/douyin/user/login/
-* 注册/douyin/user/register/
-* 用户信息/douyin/user/
-* 视频流接口/feed/
-* 投稿接口/publish/action/
-* 发布列表/publish/list/
-* 关注操作/relation/action/
-* 关注列表/relation/follow/list/
-* 粉丝列表/relation/follower/list/
-
-未实现接口 douyin/
-* 赞操作/favorite/action/
-* 点赞列表/favorite/list/
-* 评论操作/comment/action/
-* 评论列表/comment/list/
 
 
-### 说明
-* 用户登录数据保存在内存中，单次运行过程中有效
-* 视频上传后会保存到本地 public 目录中，访问时用 127.0.0.1:8080/public/videos/video_name 即可
+## 说明
+* User login data is stored in memory and is valid during a single run
+* After the video is uploaded, it is saved to the local public directory for access  http://127.0.0.1:8080/public/videos/video_name 
 
-### 测试数据
+## Directory
 
-测试数据写在 demo_data.go 中，用于列表接口的 mock 测试
+    .
+    ├── controller                          # API functions and response structure
+    │   ├── comment.go
+    │   ├── common.go
+    │   ├── favorite.go
+    │   ├── feed.go
+    │   ├── publish.go
+    │   ├── relation.go
+    │   └── user.go
+    ├── public                              # public static resources on server
+    │   ├── covers                          # store static pictures of video cover
+    │   │   └──*.png
+    │   └── videos                          # store static videos
+    │       └──*.mp4
+    ├── repository                          # init, models and CRUD of database
+    │   ├── comment.go
+    │   ├── db_init.go
+    │   ├── follow.go
+    │   ├── like.go
+    │   ├── user.go
+    │   └── video.go
+    ├── service                             # realisation of functions in controller
+    │   ├── comment.go
+    │   ├── follow.go
+    │   ├── like.go
+    │   ├── user.go
+    │   └── video.go
+    ├── test                                # test files
+    │   └── ...
+    ├── util
+    │   ├── MD5.go                          # encryption function
+    │   └── logger.go                       # write error as json
+    ├── .gitattributes
+    ├── .gitignore
+    ├── go.mod
+    ├── go.sum
+    ├── main.go                             # start of execution
+    └── router.go                           # path configuration
+  

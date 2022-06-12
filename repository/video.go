@@ -105,8 +105,3 @@ func CountLike(videoId int64) (int64, error) {
 	}
 	return count, nil
 }
-
-// count comment number
-func CountComment(videoId int64) (int64, error) {
-	return 0, nil
-}

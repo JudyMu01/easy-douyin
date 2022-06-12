@@ -6,6 +6,7 @@ import (
 
 	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/JudyMu01/easy-douyin/service"
+	"github.com/JudyMu01/easy-douyin/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +28,7 @@ type UserResponse struct {
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
+	password = util.Md5V(password)
 	token := username + password
 
 	//query if user exists
@@ -55,6 +57,7 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
+	password = util.Md5V(password)
 	token := username + password
 
 	if user, exist := repository.UsersLoginInfo[token]; exist {
