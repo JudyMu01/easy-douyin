@@ -24,11 +24,6 @@ go build && ./easy-douyin
 ```
 
 
-
-## 说明
-* User login data is stored in memory and is valid during a single run
-* After the video is uploaded, it is saved to the local public directory for access  http://127.0.0.1:8080/public/videos/video_name 
-
 ## Directory
 
     .
@@ -61,8 +56,11 @@ go build && ./easy-douyin
     ├── test                                # test files
     │   └── ...
     ├── util
-    │   ├── MD5.go                          # encryption function
-    │   └── logger.go                       # write error as json
+    │   └── MD5.go                          # encryption function
+    ├── middleware
+    │   ├── logger.go                       # provide error log
+    │   ├── auth.go                         # authority function handler
+    │   └── jwt.go                          # generate and parse jwt
     ├── .gitattributes
     ├── .gitignore
     ├── go.mod
@@ -70,3 +68,8 @@ go build && ./easy-douyin
     ├── main.go                             # start of execution
     └── router.go                           # path configuration
   
+
+
+## Some explain
+* User login data is stored in memory and is valid during a single run
+* After the video is uploaded, it is saved to the local public directory for access  http://127.0.0.1:8080/public/videos/video_name 
