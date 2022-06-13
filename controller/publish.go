@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/JudyMu01/easy-douyin/middleware"
 	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/gin-gonic/gin"
@@ -20,10 +21,8 @@ type VideoListResponse struct {
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 	title := c.PostForm("title")
-	if _, exist := repository.UsersLoginInfo[token]; !exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
+	auth, _ := middleware.ParseToken(token)
+	token = auth.GetToken()
 
 	data, err := c.FormFile("data")
 	if err != nil {
@@ -36,6 +35,7 @@ func Publish(c *gin.Context) {
 
 	filename := filepath.Base(data.Filename)
 	user := repository.UsersLoginInfo[token]
+	fmt.Println(user.Password)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/videos/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {
@@ -66,7 +66,8 @@ func Publish(c *gin.Context) {
 func PublishList(c *gin.Context) {
 	token := c.Query("token")
 	userID, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
-
+	auth, _ := middleware.ParseToken(token)
+	token = auth.GetToken()
 	videoList, err := service.GetPublishList(userID, token)
 	if err != nil {
 		fmt.Printf("get publish list failed: %s", err)

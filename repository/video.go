@@ -39,7 +39,7 @@ func NewVideoDaoInstance() *VideoDao {
 // feed videos before latest time, order by create_time
 func (*VideoDao) VideoPrepare(latest int64) ([]*Video, error) {
 
-	var videoList []*Video
+	var videoList []*Video = make([]*Video, 0, 20)
 	//format the time to compare with the time in db
 	tm := time.Unix(latest/1000, 0)
 	err := db.Model(&Video{}).Where("create_time < ?", tm).Order("create_time desc").Find(&videoList).Error

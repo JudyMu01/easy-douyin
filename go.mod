@@ -3,6 +3,7 @@ module github.com/JudyMu01/easy-douyin
 go 1.17
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2
 	github.com/gin-gonic/gin v1.7.7
 	github.com/u2takey/ffmpeg-go v0.4.1

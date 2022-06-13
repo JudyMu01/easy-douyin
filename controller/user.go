@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/JudyMu01/easy-douyin/middleware"
 	"github.com/JudyMu01/easy-douyin/repository"
 	"github.com/JudyMu01/easy-douyin/service"
 	"github.com/JudyMu01/easy-douyin/util"
@@ -61,15 +62,17 @@ func Login(c *gin.Context) {
 	token := username + password
 
 	if user, exist := repository.UsersLoginInfo[token]; exist {
+
 		if repository.UsersLoginInfo[token].Password != password {
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 2, StatusMsg: "Password wrong"},
 			})
 		} else {
+			tokenString, _ := middleware.GenerateToken(username, password)
 			c.JSON(http.StatusOK, UserLoginResponse{
 				Response: Response{StatusCode: 0},
 				UserId:   user.Id,
-				Token:    token,
+				Token:    tokenString,
 			})
 		}
 	} else {
@@ -82,6 +85,8 @@ func Login(c *gin.Context) {
 func UserInfo(c *gin.Context) {
 	userid, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	token := c.Query("token")
+	claim, _ := middleware.ParseToken(token)
+	token = claim.GetToken()
 	userData, err := service.QueryUserData(userid, token)
 	if err == nil {
 		c.JSON(http.StatusOK, UserResponse{

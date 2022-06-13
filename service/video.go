@@ -37,9 +37,9 @@ func PrepareVideoData(latestTime int64, token string) ([]VideoData, int64, error
 		util.Logger.Error("find video list from VideoPrepare err:" + err.Error())
 		return nil, time.Now().Unix(), err
 	}
-	var videoData = make([]VideoData, 10)
-	var next_time int64
+	var videoData = make([]VideoData, 20)
 	videoData, err = prepare_videoData(videos, token)
+	var next_time int64
 	if err != nil {
 		util.Logger.Error("prepare video data err:" + err.Error())
 		return nil, time.Now().Unix(), err
